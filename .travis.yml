@@ -1,142 +1,33 @@
 language: cpp
 sudo: false
 dist: trusty
-ruby: 2.2.0
-notifications:
-  slack:
-    secure: F2nQIW6SiaGdw1LjuZOlgBu8rUVMllrDG/5bhmTQP7gyETfViFBjTsHQdTle6jtdb+LudleZaG7WhdEiVcKUa834rKqDk1UOt9p6bsmgbsBZBAaxmPh01iVFhKn3ML7JLjfr1YtH7MWJcsS60cNBrohXfVKfFzNgDqZEu/llr90=
-cache:
-  bundler: true
-  ccache: true
-  pip: true
 env:
   global:
-    - USE_CCACHE=1
-    - CCACHE_COMPRESS=1
-    - CCACHE_MAXSIZE=200M
-    - CCACHE_CPP2=1
-    - PIPENV_VENV_IN_PROJECT=1
-    - PIPENV_IGNORE_VIRTUALENVS=1
-branches:
-  except:
-    - fix-appveyor
-matrix:
-  include:
-    - os: linux
-      addons:
-        apt:
-          packages:
-            - cmake3
-            - cmake3-data
-            - clang
-            - clang-format-3.9
-            - gfortran-4.6
-            - libboost-math-dev
-      env:
-        - CXX_COMPILER='clang++'
-        - C_COMPILER='clang'
-        - Fortran_COMPILER='gfortran-4.6'
-        - BUILD_TYPE='release'
-        - PYTHON='--three'
-        - RUN_DANGER=true
-    - os: linux
-      addons:
-        apt:
-          packages:
-            - cmake3
-            - cmake3-data
-            - g++-4.6
-            - gcc-4.6
-            - gfortran-4.6
-            - libboost-math-dev
-      env:
-        - CXX_COMPILER='g++-4.6'
-        - C_COMPILER='gcc-4.6'
-        - Fortran_COMPILER='gfortran-4.6'
-        - BUILD_TYPE='release'
-        - PYTHON='--two'
-        - RUN_DANGER=false
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - cmake3
-            - cmake3-data
-            - g++-6
-            - gcc-6
-            - gfortran-6
-            - libboost-math-dev
-      env:
-        - CXX_COMPILER='g++-6'
-        - C_COMPILER='gcc-6'
-        - Fortran_COMPILER='gfortran-6'
-        - BUILD_TYPE='release'
-        - PYTHON='--two'
-        - STATIC='--static'
-        - RUN_DANGER=false
-    - os: linux
-      addons:
-        apt:
-          packages:
-            - cmake3
-            - cmake3-data
-            - g++-4.8
-            - gcc-4.8
-            - gfortran-4.8
-            - libboost-math-dev
-            - lcov
-      env:
-        - CXX_COMPILER='g++-4.8'
-        - C_COMPILER='gcc-4.8'
-        - Fortran_COMPILER='gfortran-4.8'
-        - BUILD_TYPE='debug'
-        - PYTHON='--two'
-        - COVERAGE='--coverage'
-        - RUN_DANGER=false
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "i/Rf+zE11b6EBbrr/vx5tiQc0FNbVO8Jz4bBUjxvJMy2YROPewN2GvHSHoLaEuz5+kD5gRF3MdTv+D3boOkYIJR32Y4T5IOlobA9dDUqGbMUae261uYfFbc05Dep+ZzWvNhQwn08zWJR/tYsgToFDeqcX+jUzIFOXat8qMLYBmfMwQ/B4nWWX775DsZ0v1fqrxGlpS0S2gHPEOWeULthRKII7t3rtM/lfnpSSN/cvsNvHPEn0lUwK9R1XJmij7Td6XJ+nFozIXN6HIP54cOfZBH7mGP+DyLokgoxAYFyr6e5d8FkgL4CefcAPWBRNPat44E7h+H40BFZlsTE8Z/CVwqfcwol7Hfu6abBIGHmXh/LJ411wIh8JFWHkqRCyxgHqE68UF+YZyC0Mk8ERnEcVGR4QagBYrHNiM6oFO2bMw5lIlXVgPbhwjCvfXDSIkvriWz6SB+nJbvEBlGuqnI+RfW4o5DCrTAY7+SwWQqux6PiDhulhQdoKHVUzOKonIVmXtB+HQWF8iW/QvQ+YV5JErcxi4faS2FLv9ftbf2nTwVHVUFURsQrC4bsnbX5Jky7AvJHVoxKXIkfsfXi1mAwVDFzKa1IzQvaq2EP29pleHk7AHlrhvc/K6kXFjeQjTcZ+urxkx4UmDWCslu6TAiiGzNemd3oEx3ddXabZQ4VHl0="
 before_install:
   - test -n $CC && unset CC
   - test -n $CXX && unset CXX
   - test -n $FC && unset FC
-install:
-  - pip install --user pipenv --upgrade
-  - pipenv $PYTHON install
-before_script:
-  - source $(pipenv --venv)/bin/activate
-  - ./.ci/report_versions.sh
-  - cd $TRAVIS_BUILD_DIR
-  - echo 'Build set up summary'
-  - |
-    if [[ "$RUN_DANGER" = true ]]; then
-      bundle install --gemfile=.ci/Gemfile
-    fi
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - cmake3
+      - g++-7
+      - gcc-7
+      - gfortran-7
+      - libboost-math-dev
+  coverity_scan:
+    project:
+      name: "PCMSolver/pcmsolver"
+      description: "An API for the Polarizable Continuum Model"
+    notification_email: roberto.diremigio@gmail.com
+    build_command_prepend: "python setup.py --cxx=g++-7 --cc=gcc-7 --fc=gfortran-7 --type=debug --ccache=off --cmake-options='-DENABLE_TESTS=OFF -DENABLE_Fortran_API=ON'"
+    build_command: "cmake --build build -- VERBOSE=1 -j 2"
+    branch_pattern: coverity_scan
 script:
-  - |
-    if [[ "$RUN_DANGER" = true ]]; then
-      BUNDLE_GEMFILE=.ci/Gemfile bundle exec danger --dangerfile=.ci/Dangerfile --verbose
-    fi
-  - |
-    python setup.py --cxx=$CXX_COMPILER \
-                    --cc=$C_COMPILER \
-                    --fc=$Fortran_COMPILER \
-                    --type=$BUILD_TYPE \
-                    $STATIC \
-                    $COVERAGE \
-                    --prefix=$HOME/Software/pcmsolver
-  - cd build
-  - ../.ci/ci_build.sh
-  - travis_wait 40 python ../.ci/ci_test.py ctest --output-on-failure --verbose --parallel 2
-  - python ../.ci/ci_print_failing.py
-after_success:
-  - |
-    if [[ "$COVERAGE" = "--coverage" ]]; then
-      cd $TRAVIS_BUILD_DIR
-      lcov --version
-      lcov --directory . --capture --output-file coverage.info
-      lcov --remove coverage.info '/usr/*' --output-file coverage.info
-      lcov --remove coverage.info 'external/*' --output-file coverage.info
-      lcov --remove coverage.info 'tests/*' --output-file coverage.info
-      lcov --list coverage.info
-      bash <(curl -s https://codecov.io/bash) -X gcov || echo "Codecov did not collect coverage reports"
-    fi
+  - cmake --build build -- VERBOSE=1 -j 2
