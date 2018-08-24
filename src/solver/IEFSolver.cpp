@@ -88,18 +88,20 @@ void IEFSolver::buildIsotropicMatrix(const ICavity & cav,
   // For the moment just packs into a std::vector<Eigen::MatrixXd>
   utils::symmetryPacking(blockTepsilon_, Tepsilon_, dimBlock, nrBlocks);
   utils::symmetryPacking(blockRinfinity_, Rinfinity_, dimBlock, nrBlocks);
-  blockTepsilon_LU.reserve(nrBlocks);
+  //blockTepsilon_LU.reserve(nrBlocks);
   for(int i=0;i<nrBlocks;++i)
   {
 	  blockTepsilon_[i].partialPivLu();
 	  std::cout << "success" << std::endl;
-	  blockTepsilon_LU[i]=blockTepsilon_[i].partialPivLu();
+	  //std::cout << blockTepsilon_LU.size() << std::endl;
+	  blockTepsilon_LU.push_back(blockTepsilon_[i].partialPivLu());
   }
   if (hermitivitize_) {
-	  blockTepsilon_LU_adjoint.reserve(nrBlocks);
+	  //blockTepsilon_LU_adjoint.reserve(nrBlocks);
 	  for(int i=0;i<nrBlocks;++i)
-		  blockTepsilon_LU_adjoint[i]=Eigen::MatrixXd(blockTepsilon_[i].adjoint()).partialPivLu();
+		  blockTepsilon_LU_adjoint.push_back(Eigen::MatrixXd(blockTepsilon_[i].adjoint()).partialPivLu());
   }
+  built_ = true;
 
 }
 
@@ -139,9 +141,6 @@ Eigen::MatrixXd IEFSolver::getmatrix(int irrep) const {
   // full dimension of the cavity. We have to select just the part
   // relative to the irrep needed.
 	Eigen::MatrixXd matrix=-blockTepsilon_[irrep].inverse()*blockRinfinity_[irrep];
-	Eigen::MatrixXd error=blockTepsilon_[irrep]-blockTepsilon_[irrep].transpose().eval();
-	std::cout << error.array().abs().matrix().maxCoeff() << std::endl;
-	//std::cout << matrix.eigenvalues().real().minCoeff() << std::endl;
 
   // Obtain polarization weights
   if (hermitivitize_) {
