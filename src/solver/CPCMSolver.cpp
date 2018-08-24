@@ -77,11 +77,15 @@ Eigen::VectorXd CPCMSolver::computeCharge_impl(const Eigen::VectorXd & potential
   int irrDim = fullDim / nrBlocks;
   charge.segment(irrep * irrDim, irrDim) =
       -blockS_[irrep].llt().solve(potential.segment(irrep * irrDim, irrDim));
+  /*
+  Eigen::VectorXd newcharge=getmatrix(irrep)*potential.segment(irrep*irrDim,irrDim);
+  std::cout << newcharge-charge << std::endl;
+  */
 
   return charge;
 }
 
-Eigen::MatrixXd CPCMSolver::getmatrix(int irrep) {
+Eigen::MatrixXd CPCMSolver::getmatrix(int irrep) const {
   // The potential and charge vector are of dimension equal to the
   // full dimension of the cavity. We have to select just the part
   // relative to the irrep needed.

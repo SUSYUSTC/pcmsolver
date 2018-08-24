@@ -52,6 +52,7 @@
 #include "utils/Solvent.hpp"
 #include "utils/Sphere.hpp"
 #include "utils/cnpy.hpp"
+#include <memory>
 
 #ifndef AS_TYPE
 #define AS_TYPE(Type, Obj) reinterpret_cast<Type *>(Obj)
@@ -209,7 +210,9 @@ PCMSolverIndex pcm::Meddle::getIrreducibleCavitySize() const {
   return cavity_->irreducible_size();
 }
 double* pcm::Meddle::getmatrix(int irrep){
-	return this->K_0_->getmatrix(irrep).data();
+	Eigen::MatrixXd* matrix=new Eigen::MatrixXd;
+	*matrix=this->K_0_->getmatrix(irrep);
+	return matrix->data();
 }
 
 void pcmsolver_get_centers(pcmsolver_context_t * context, double centers[]) {
@@ -310,7 +313,8 @@ void pcmsolver_compute_response_asc(pcmsolver_context_t * context,
   TIMER_OFF("pcmsolver_compute_response_asc");
 }
 double* pcmsolver_getmatrix(pcmsolver_context_t * context, int irrep){
-	return AS_TYPE(pcm::Meddle, context)->getmatrix(irrep);
+	double* result=AS_TYPE(pcm::Meddle, context)->getmatrix(irrep);
+	return result;
 }
 void pcm::Meddle::computeResponseASC(const std::string & mep_name,
                                      const std::string & asc_name,

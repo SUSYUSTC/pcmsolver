@@ -122,17 +122,19 @@ Eigen::VectorXd IEFSolver::computeCharge_impl(const Eigen::VectorXd & potential,
   return charge;
 }
 
-Eigen::MatrixXd IEFSolver::getmatrix(int irrep) {
+Eigen::MatrixXd IEFSolver::getmatrix(int irrep) const {
   // The potential and charge vector are of dimension equal to the
   // full dimension of the cavity. We have to select just the part
   // relative to the irrep needed.
 	Eigen::MatrixXd matrix=-blockTepsilon_[irrep].inverse()*blockRinfinity_[irrep];
+	Eigen::MaxtriXd error=blockTepsilon_-blockTepsilon_.transpose().eval();
+	std::cout << error.array().abs().matrix().maxCoeff() << std::endl;
+	std::cout << matrix.eigenvalues().real().minCoeff() << std::endl;
 
   // Obtain polarization weights
   if (hermitivitize_) {
     matrix = (matrix+matrix.adjoint())*0.5;
   }
-
   return matrix;
 }
 std::ostream & IEFSolver::printSolver(std::ostream & os) {
