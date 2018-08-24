@@ -88,8 +88,19 @@ void IEFSolver::buildIsotropicMatrix(const ICavity & cav,
   // For the moment just packs into a std::vector<Eigen::MatrixXd>
   utils::symmetryPacking(blockTepsilon_, Tepsilon_, dimBlock, nrBlocks);
   utils::symmetryPacking(blockRinfinity_, Rinfinity_, dimBlock, nrBlocks);
+  blockTepsilon_LU.reserve(nrBlocks);
+  for(int i=0;i<nrBlocks;++i)
+  {
+	  blockTepsilon_[i].partialPivLu();
+	  std::cout << "success" << std::endl;
+	  blockTepsilon_LU[i]=blockTepsilon_[i].partialPivLu();
+  }
+  if (hermitivitize_) {
+	  blockTepsilon_LU_adjoint.reserve(nrBlocks);
+	  for(int i=0;i<nrBlocks;++i)
+		  blockTepsilon_LU_adjoint[i]=Eigen::MatrixXd(blockTepsilon_[i].adjoint()).partialPivLu();
+  }
 
-  built_ = true;
 }
 
 Eigen::VectorXd IEFSolver::computeCharge_impl(const Eigen::VectorXd & potential,
@@ -101,32 +112,12 @@ Eigen::VectorXd IEFSolver::computeCharge_impl(const Eigen::VectorXd & potential,
   Eigen::VectorXd charge = Eigen::VectorXd::Zero(fullDim);
   int nrBlocks = blockRinfinity_.size();
   int irrDim = fullDim / nrBlocks;
-  /*
-  if(not is_bLU_init)
-  {
-	  int N=blockTepsilon_.size();
-	  blockTepsilon_LU.reserve(N);
-	  for(int i=0;i<N;++i)
-		  blockTepsilon_LU[i]=blockTepsilon_[i].partialPivLu();
-	  is_bLU_init=true;
-  }
-  */
   charge.segment(irrep * irrDim, irrDim) =
       -blockTepsilon_LU[irrep].solve(
           blockRinfinity_[irrep] * potential.segment(irrep * irrDim, irrDim));
 
   // Obtain polarization weights
   if (hermitivitize_) {
-	  /*
-	  if(not is_bLUad_init)
-	  {
-		  int N=blockTepsilon_.size();
-		  blockTepsilon_LU.reserve(N);
-		  for(int i=0;i<N;++i)
-			  blockTepsilon_LU_adjoint[i]=blockTepsilon_[i].adjoint().partialPivLu();
-		  is_bLUad_init=true;
-	  }
-	  */
     Eigen::VectorXd adj_asc = Eigen::VectorXd::Zero(fullDim);
     // Form T^\dagger * v = c
     adj_asc.segment(irrep * irrDim, irrDim) =
