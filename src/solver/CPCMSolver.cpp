@@ -81,6 +81,12 @@ Eigen::VectorXd CPCMSolver::computeCharge_impl(const Eigen::VectorXd & potential
   return charge;
 }
 
+Eigen::MatrixXd CPCMSolver::getmatrix(int irrep) {
+  // The potential and charge vector are of dimension equal to the
+  // full dimension of the cavity. We have to select just the part
+  // relative to the irrep needed.
+  return -blockS_[irrep].inverse();
+}
 std::ostream & CPCMSolver::printSolver(std::ostream & os) {
   os << "Solver Type: C-PCM" << std::endl;
   if (hermitivitize_) {

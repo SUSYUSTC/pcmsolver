@@ -208,6 +208,9 @@ PCMSolverIndex pcmsolver_get_irreducible_cavity_size(pcmsolver_context_t * conte
 PCMSolverIndex pcm::Meddle::getIrreducibleCavitySize() const {
   return cavity_->irreducible_size();
 }
+double* pcm::Meddle::getmatrix(int irrep){
+	return this->K_0_->getmatrix(irrep).data();
+}
 
 void pcmsolver_get_centers(pcmsolver_context_t * context, double centers[]) {
   TIMER_ON("pcmsolver_get_centers");
@@ -305,6 +308,9 @@ void pcmsolver_compute_response_asc(pcmsolver_context_t * context,
   AS_TYPE(pcm::Meddle, context)
       ->computeResponseASC(std::string(mep_name), std::string(asc_name), irrep);
   TIMER_OFF("pcmsolver_compute_response_asc");
+}
+double* pcmsolver_getmatrix(pcmsolver_context_t * context, int irrep){
+	return AS_TYPE(pcm::Meddle, context)->getmatrix(irrep);
 }
 void pcm::Meddle::computeResponseASC(const std::string & mep_name,
                                      const std::string & asc_name,

@@ -97,6 +97,7 @@ public:
                             const IGreensFunction & gf_i,
                             const IGreensFunction & gf_o,
                             const IBoundaryIntegralOperator & op);
+  Eigen::MatrixXd getmatrix(int irrps);
 
 private:
   /*! Whether the system matrix has to be symmetrized */
