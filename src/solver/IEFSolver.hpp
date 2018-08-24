@@ -30,6 +30,7 @@
 #include "Config.hpp"
 
 #include <Eigen/Core>
+#include <Eigen/Dense>
 
 /*! \file IEFSolver.hpp */
 
@@ -106,6 +107,10 @@ private:
   Eigen::MatrixXd Tepsilon_;
   /*! T(epsilon) matrix, symmetry blocked form */
   std::vector<Eigen::MatrixXd> blockTepsilon_;
+  std::vector<Eigen::PartialPivLU<Eigen::MatrixXd>> blockTepsilon_LU;
+  bool is_bLU_init;
+  std::vector<Eigen::PartialPivLU<Eigen::MatrixXd>> blockTepsilon_LU_adjoint;
+  bool is_bLUad_init;
   /*! R_infinity matrix, not symmetry blocked */
   Eigen::MatrixXd Rinfinity_;
   /*! R_infinity matrix, symmetry blocked form */

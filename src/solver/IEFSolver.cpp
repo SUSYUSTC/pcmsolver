@@ -41,6 +41,7 @@
 #include "cavity/ICavity.hpp"
 #include "green/IGreensFunction.hpp"
 #include "utils/MathUtils.hpp"
+#include <algorithm>
 
 namespace pcm {
 namespace solver {
@@ -100,16 +101,36 @@ Eigen::VectorXd IEFSolver::computeCharge_impl(const Eigen::VectorXd & potential,
   Eigen::VectorXd charge = Eigen::VectorXd::Zero(fullDim);
   int nrBlocks = blockRinfinity_.size();
   int irrDim = fullDim / nrBlocks;
+  /*
+  if(not is_bLU_init)
+  {
+	  int N=blockTepsilon_.size();
+	  blockTepsilon_LU.reserve(N);
+	  for(int i=0;i<N;++i)
+		  blockTepsilon_LU[i]=blockTepsilon_[i].partialPivLu();
+	  is_bLU_init=true;
+  }
+  */
   charge.segment(irrep * irrDim, irrDim) =
-      -blockTepsilon_[irrep].partialPivLu().solve(
+      -blockTepsilon_LU[irrep].solve(
           blockRinfinity_[irrep] * potential.segment(irrep * irrDim, irrDim));
 
   // Obtain polarization weights
   if (hermitivitize_) {
+	  /*
+	  if(not is_bLUad_init)
+	  {
+		  int N=blockTepsilon_.size();
+		  blockTepsilon_LU.reserve(N);
+		  for(int i=0;i<N;++i)
+			  blockTepsilon_LU_adjoint[i]=blockTepsilon_[i].adjoint().partialPivLu();
+		  is_bLUad_init=true;
+	  }
+	  */
     Eigen::VectorXd adj_asc = Eigen::VectorXd::Zero(fullDim);
     // Form T^\dagger * v = c
     adj_asc.segment(irrep * irrDim, irrDim) =
-        blockTepsilon_[irrep].adjoint().partialPivLu().solve(
+        blockTepsilon_LU_adjoint[irrep].solve(
             potential.segment(irrep * irrDim, irrDim));
     // Form R^\dagger * c = q^* ("transposed" polarization charges)
     adj_asc.segment(irrep * irrDim, irrDim) =
@@ -127,9 +148,9 @@ Eigen::MatrixXd IEFSolver::getmatrix(int irrep) const {
   // full dimension of the cavity. We have to select just the part
   // relative to the irrep needed.
 	Eigen::MatrixXd matrix=-blockTepsilon_[irrep].inverse()*blockRinfinity_[irrep];
-	Eigen::MaxtriXd error=blockTepsilon_-blockTepsilon_.transpose().eval();
+	Eigen::MatrixXd error=blockTepsilon_[irrep]-blockTepsilon_[irrep].transpose().eval();
 	std::cout << error.array().abs().matrix().maxCoeff() << std::endl;
-	std::cout << matrix.eigenvalues().real().minCoeff() << std::endl;
+	//std::cout << matrix.eigenvalues().real().minCoeff() << std::endl;
 
   // Obtain polarization weights
   if (hermitivitize_) {
