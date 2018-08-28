@@ -568,7 +568,7 @@ Molecule initMolecule(const Input & inp,
     int index = int(charges(i)) - 1;
     atoms.push_back(radiiSet[index]);
     if (scaling)
-      atoms[i].radiusScaling = 1.1;
+      atoms[i].radiusScaling = 1.2;
     // Convert to Bohr and multiply by scaling factor (alpha)
     double radius = atoms[i].radius * angstromToBohr() * atoms[i].radiusScaling;
     spheres.push_back(Sphere(centers.col(i), radius));

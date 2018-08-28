@@ -295,7 +295,7 @@ void Input::initMolecule() {
     int index = int(charges(i)) - 1;
     atoms.push_back(radiiSet[index]);
     if (scaling_)
-      atoms[i].radiusScaling = 1.1;
+      atoms[i].radiusScaling = 1.2;
   }
   // Based on the creation mode (Implicit or Atoms)
   // the spheres list might need postprocessing
