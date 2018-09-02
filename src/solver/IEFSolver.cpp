@@ -92,7 +92,6 @@ void IEFSolver::buildIsotropicMatrix(const ICavity & cav,
   for(int i=0;i<nrBlocks;++i)
   {
 	  blockTepsilon_[i].partialPivLu();
-	  std::cout << "success" << std::endl;
 	  //std::cout << blockTepsilon_LU.size() << std::endl;
 	  blockTepsilon_LU.push_back(blockTepsilon_[i].partialPivLu());
   }
